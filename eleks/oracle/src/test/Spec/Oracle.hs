@@ -11,6 +11,7 @@
 
 module Spec.Oracle
     ( tests
+    , updateOracleTrace
     ) where
 
 import           Control.Lens

@@ -132,10 +132,17 @@ mkOracleValidator oracle oracleData r ctx =
                                             >>= verifyOracleValueSigned (oOperatorKey oracle) 
                                             >>= (\(message, _) -> Just message)
 
-    isUpdateValid = (not isCurrentValueSigned) || 
-        (fromMaybe False $ validateGameStatusChanges <$> 
-        (osmGameStatus <$> extractSigendMessage (ovSignedMessage oracleData)) <*> 
+    -- if then else is way cheaper!
+    isUpdateValid = if not isCurrentValueSigned then True else
+        (fromMaybe False $ validateGameStatusChanges <$>
+        (osmGameStatus <$> extractSigendMessage (ovSignedMessage oracleData)) <*>
         (osmGameStatus <$> extractSigendMessage outputSignedMessage))
+
+    -- || is surprisingly way more expensive!
+    -- isUpdateValid = (not isCurrentValueSigned) ||
+    --     (fromMaybe False $ validateGameStatusChanges <$>
+    --     (osmGameStatus <$> extractSigendMessage (ovSignedMessage oracleData)) <*>
+    --     (osmGameStatus <$> extractSigendMessage outputSignedMessage))
 
 {-# INLINABLE verifyOracleValueSigned #-}
 verifyOracleValueSigned :: PubKey -> SignedMessage OracleSignedMessage -> Maybe (OracleSignedMessage, TxConstraints Void Void)
